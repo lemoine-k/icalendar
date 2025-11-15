@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "日历应用",
+    "slug": "calendar-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.calendarapp"
+    },
+    "android": {
+      "package": "com.yourcompany.calendarapp"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7f002ae8-d54a-4147-a8c1-71af25d0af8e"
+      }
+    }
+  }
+}
