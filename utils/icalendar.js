@@ -96,6 +96,38 @@ export function parseICalDateTime(icalDateTime) {
 }
 
 /**
+ * 解析 iCalendar DATE-TIME 为 Date 对象
+ * @param {string} icalDateTime - iCalendar DATE-TIME 格式
+ * @returns {Date} - JavaScript Date 对象
+ */
+export function parseICalDateTimeToDate(icalDateTime) {
+  if (!icalDateTime) return new Date();
+  
+  // 移除 Z 后缀（如果有）
+  const dt = icalDateTime.replace('Z', '');
+  
+  if (dt.includes('T')) {
+    // DATE-TIME 格式
+    const [datePart, timePart] = dt.split('T');
+    const year = parseInt(datePart.substring(0, 4));
+    const month = parseInt(datePart.substring(4, 6)) - 1; // JavaScript 月份从 0 开始
+    const day = parseInt(datePart.substring(6, 8));
+    const hours = parseInt(timePart.substring(0, 2));
+    const minutes = parseInt(timePart.substring(2, 4));
+    const seconds = parseInt(timePart.substring(4, 6)) || 0;
+    
+    return new Date(year, month, day, hours, minutes, seconds);
+  } else {
+    // DATE 格式（全天事件）
+    const year = parseInt(dt.substring(0, 4));
+    const month = parseInt(dt.substring(4, 6)) - 1;
+    const day = parseInt(dt.substring(6, 8));
+    
+    return new Date(year, month, day, 0, 0, 0);
+  }
+}
+
+/**
  * 创建 VEVENT 对象
  * RFC 5545 Section 3.6.1
  */
@@ -640,7 +672,28 @@ export function getAlarmDescription(trigger) {
     '-P1W': '提前1周',
   };
   
-  return triggerMap[trigger] || trigger;
+  // 如果在预设映射中找到，直接返回
+  if (triggerMap[trigger]) {
+    return triggerMap[trigger];
+  }
+  
+  // 尝试解析自定义时间格式
+  const match = trigger.match(/^-?P(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?)?$/);
+  if (match) {
+    const [, weeks, days, hours, minutes] = match;
+    const parts = [];
+    
+    if (weeks) parts.push(`${weeks}周`);
+    if (days) parts.push(`${days}天`);
+    if (hours) parts.push(`${hours}小时`);
+    if (minutes) parts.push(`${minutes}分钟`);
+    
+    if (parts.length > 0) {
+      return `提前${parts.join('')}`;
+    }
+  }
+  
+  return trigger;
 }
 
 /**

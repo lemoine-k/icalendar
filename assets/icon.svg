@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆角矩形 -->
+  <rect width="512" height="512" rx="80" ry="80" fill="#ff3b30"/>
+  
+  <!-- 日历图标 (放大到合适尺寸) -->
+  <g transform="translate(106, 106) scale(12.5)">
+    <path d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" 
+          fill="none" 
+          stroke="white" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+  </g>
+  
+  <!-- 添加一些装饰性元素 -->
+  <circle cx="180" cy="200" r="8" fill="white" opacity="0.8"/>
+  <circle cx="256" cy="200" r="8" fill="white" opacity="0.8"/>
+  <circle cx="332" cy="200" r="8" fill="white" opacity="0.8"/>
+  
+  <circle cx="180" cy="250" r="8" fill="white" opacity="0.6"/>
+  <circle cx="256" cy="250" r="8" fill="white" opacity="0.9"/>
+  <circle cx="332" cy="250" r="8" fill="white" opacity="0.6"/>
+  
+  <circle cx="180" cy="300" r="8" fill="white" opacity="0.6"/>
+  <circle cx="256" cy="300" r="8" fill="white" opacity="0.6"/>
+  <circle cx="332" cy="300" r="8" fill="white" opacity="0.6"/>
+</svg>

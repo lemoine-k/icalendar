@@ -1,106 +1,85 @@
-# 📅 React Native 日历应用
+# 📅 iCalSched - 智能日历应用
 
 <div align="center">
 
-[![Status](https://img.shields.io/badge/status-完成-success)]()
-[![Version](https://img.shields.io/badge/version-13.0-blue)]()
+[![Status](https://img.shields.io/badge/status-稳定版-success)]()
+[![Version](https://img.shields.io/badge/version-1.2.0-blue)]()
 [![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android%20%7C%20Web-lightgrey)]()
 [![License](https://img.shields.io/badge/license-MIT-green)]()
 
-一个功能完整、设计精美的跨平台日历应用
+一个功能完整、设计精美的跨平台智能日历应用，支持农历、节假日、事件订阅、智能提醒等功能
 
-[功能特性](#-功能特性) • [快速开始](#-快速开始) • [移动端部署](#-移动端部署指南) • [技术架构](#-技术架构) • [技术亮点](#-技术亮点)
+[功能特性](#-功能特性) • [快速开始](#-快速开始) • [安装指南](#-安装指南) • [技术架构](#-技术架构) • [产品报告](#-产品报告)
 
 </div>
 
 ---
 
-## 📖 目录
+## ✨ 功能特性
 
-- [产品功能介绍](#-产品功能介绍)
-- [快速开始](#-快速开始)
-- [移动端部署指南](#-移动端部署指南)
-- [程序概要设计](#-程序概要设计)
-- [软件架构图](#-软件架构图)
-- [技术亮点及实现原理](#-技术亮点及实现原理)
-- [项目结构](#-项目结构)
-- [开发指南](#-开发指南)
-
----
-
-## 🎯 产品功能介绍
-
-### 核心功能
+### 🎯 核心功能
 
 #### 📅 多视图日历展示
 - **月视图**：完整月份日历，支持农历显示、节假日标识、事件指示器
-- **周视图**：一周7天概览，时间轴展示，事件分类显示
-- **日视图**：单日详细信息，完整事件列表，订阅事件区分
-- **流畅切换**：60fps 动画效果，120ms 快速响应
+- **周视图**：一周7天概览，24小时时间轴，事件时间段显示
+- **日视图**：单日详细信息，24小时时间轴，完整事件列表
+- **流畅切换**：支持视图切换动画
+- **智能布局**：自动适配屏幕尺寸，支持横竖屏切换
 
-#### ✏️ 完整事件管理（CRUD）
-- **创建事件**：点击日期快速创建，支持标题、描述、地点
-- **编辑事件**：点击事件卡片即可编辑，实时保存
-- **删除事件**：一键删除，确认提示
-- **查看事件**：详细信息展示，包括重复规则和提醒设置
+#### ✏️ 智能事件管理
+- **快速创建**：点击日期即可创建事件，支持标题、描述、地点
+- **完整编辑**：点击事件卡片编辑，支持所有属性修改
+- **一键删除**：支持快速删除事件，带确认提示
+- **全天事件**：支持全天事件和跨天事件设置
+- **优先级管理**：3级优先级（高/中/低），不同颜色标识
+- **事件搜索**：支持按标题搜索事件
 
+#### 🔁 高级重复功能
+- **重复模式**：支持每天/每周/每月/每年重复
+- **自定义间隔**：可设置重复间隔和次数
+- **灵活规则**：支持按星期几重复（如每周一、三、五）
+- **重复终止**：支持设置重复次数或结束日期
+- **智能预览**：重复事件在日历中正确显示
 
-#### 🔁 高级事件功能
-- **全天事件**：开关控制，支持全天事件设置
-- **多日事件**：开关控制结束日期，支持跨天事件
-- **重复事件**：支持每天/每周/每月/每年重复模式
-- **重复次数**：自定义重复次数，灵活控制
-- **优先级管理**：4级优先级（最高/高/中/低）
-- **事件状态**：已确认/待定/已取消三种状态
-
-#### 🔔 智能提醒系统
-- **多种提醒时间**：准时/5分钟前/15分钟前/30分钟前/1小时前/1天前
-- **多个提醒**：同一事件可设置多个提醒
-- **提醒方式**：通知/声音两种方式
-- **提醒描述**：自动生成提醒描述
-
-#### 📥📤 导入导出功能
-- **iCalendar 格式**：完整支持 RFC 5545 标准
-- **导出功能**：导出为 .ics 文件，可在其他应用中打开
-- **导入功能**：支持导入 .ics 文件，自动解析事件
-- **应用兼容**：与 Google Calendar、Apple Calendar、Outlook 等主流应用完全兼容
-
-#### 🔗 日历订阅功能
-- **预设订阅源**：
-  - 中国法定节假日（自动更新）
-  - 测试日历（用于功能验证）
+#### 📚 日历订阅功能
+- **预设订阅**：中国法定节假日等官方日历
 - **自动同步**：定期自动同步订阅内容，智能刷新
 - **状态管理**：显示同步状态、事件数量、错误信息
 - **订阅控制**：启用/禁用订阅，删除订阅
 - **只读保护**：订阅事件不可编辑，保持数据完整性
+- **批量同步**：支持一键同步所有订阅
 
-#### 🌙 中国农历功能
+#### 🔔 智能提醒系统
+- **多种提醒时间**：5分钟、15分钟、30分钟、1小时、2小时、1天、2天、1周前提醒
+- **系统通知**：集成Android/iOS原生通知系统，支持声音和震动
+- **权限管理**：智能的通知权限请求和状态检查
+- **通知调度**：自动调度和取消事件通知，支持多个提醒时间
+- **测试功能**：内置通知测试功能，验证系统是否正常工作
+- **多提醒支持**：同一事件可设置多个提醒时间
+
+#### 🌙 中国农历支持
 - **农历日期**：显示农历年月日（1900-2100年）
 - **24节气**：自动计算和标注24节气
 - **传统节日**：春节、端午、中秋等传统节日识别
 - **生肖年份**：显示当前生肖
-- **农历显示**：月视图、周视图、日视图全面支持
+- **重要日期**：自动标识重要农历节日
+- **春节标识**：春节期间所有假期自动标注"春"字标识
 
-
-#### 🎨 完整主题系统
-- **6个精美主题**：
-  - 🔴 苹果红（默认）- 经典优雅
-  - 🔵 苹果蓝 - 清新专业
-  - 🟢 苹果绿 - 活力自然
-  - 🟣 苹果紫 - 神秘浪漫
-  - 🟠 苹果橙 - 温暖活泼
-  - ⚫ 暗色模式 - 护眼舒适
-- **完整主题支持**：所有界面元素动态跟随主题色
+#### 🎨 精美主题系统
+- **6个主题**：苹果红、苹果蓝、苹果绿、苹果紫、苹果橙、暗色模式
+- **完整适配**：所有界面元素动态跟随主题色
 - **实时切换**：即时更新，无需重启应用
-- **暗色模式优化**：特殊的半透明背景和文字颜色适配
+- **暗色优化**：特殊的半透明背景和护眼配色
+- **iOS风格**：采用iOS设计语言，卡片式布局，流畅动画
 
 #### 🚀 用户体验优化
-- **"今天"按钮**：一键快速回到今天
-- **快速跳转**：点击月份标题快速跳转到任意年月
-- **事件统计**：实时显示个人事件数和今天的事件数
-- **空状态提示**：优雅的空状态设计，引导用户操作
+- **快速导航**："今天"按钮、快速跳转、月份选择
+- **实时统计**：显示个人事件数、今天事件数
 - **流畅动画**：视图切换、模态框、按钮反馈全部使用流畅动画
-- **响应式设计**：适配不同屏幕尺寸，Web/iOS/Android 统一体验
+- **响应式设计**：适配不同屏幕尺寸，统一体验
+- **iOS风格UI**：采用iOS设计规范，卡片式布局，底部对齐操作按钮
+- **大触摸区域**：所有交互元素至少44x44px，提升操作体验
+- **视觉反馈**：阴影、圆角、动画等提供清晰的交互反馈
 
 ---
 
@@ -111,13 +90,15 @@
 - Node.js >= 14.0.0
 - npm 或 yarn
 - Expo CLI
+- Android Studio（Android开发）
+- Xcode（iOS开发，仅Mac）
 
 ### 安装步骤
 
 1. **克隆项目**
 ```bash
-git clone https://github.com/yourusername/calendar-app.git
-cd calendar-app
+git clone https://github.com/yourusername/icalSched.git
+cd icalSched
 ```
 
 2. **安装依赖**
@@ -142,1139 +123,326 @@ npm run android
 npm run ios
 ```
 
-> 💡 **移动端用户**：查看 [移动端部署指南](#-移动端部署指南) 或 [MOBILE_GUIDE.md](./MOBILE_GUIDE.md) 了解如何在手机上使用
+---
 
-### 在移动设备上使用
+## 📱 安装指南
 
-#### 方法一：使用 Expo Go（推荐用于开发测试）
+### 方法一：使用 Expo Go（推荐新手）
 
 1. **安装 Expo Go**
-   - iOS：在 App Store 搜索 "Expo Go" 并安装
-   - Android：在 Google Play 或应用商店搜索 "Expo Go" 并安装
+   - iOS：App Store 搜索 "Expo Go"
+   - Android：Google Play 搜索 "Expo Go"
 
-2. **启动开发服务器**
+2. **运行应用**
    ```bash
    npm start
    ```
 
-3. **连接设备**
-   - iOS：打开 Expo Go，使用相机扫描终端中的二维码
-   - Android：打开 Expo Go，点击 "Scan QR Code" 扫描二维码
+3. **扫码连接**
+   - iOS：相机扫描二维码
+   - Android：Expo Go 内扫描二维码
 
-4. **注意事项**
-   - 确保手机和电脑在同一 WiFi 网络
-   - 如果无法连接，尝试使用隧道模式：`npm start --tunnel`
+### 方法二：构建独立应用（推荐）
 
-#### 方法二：构建独立应用（推荐用于生产环境）
-
-**构建 Android APK**
+**Android APK**
 ```bash
-# 1. 安装 EAS CLI
+# 安装 EAS CLI
 npm install -g eas-cli
 
-# 2. 登录 Expo 账号
+# 登录 Expo 账号
 eas login
 
-# 3. 配置项目
-eas build:configure
-
-# 4. 构建 APK
+# 构建 APK
 eas build --platform android --profile preview
 
-# 5. 下载并安装生成的 APK 文件
+# 下载并安装 APK
 ```
 
-**构建 iOS 应用**
+**iOS 应用**
 ```bash
 # 需要 Apple Developer 账号
-
-# 1. 配置项目
-eas build:configure
-
-# 2. 构建 iOS 应用
 eas build --platform ios --profile preview
-
-# 3. 通过 TestFlight 分发或直接安装
 ```
 
-#### 方法三：本地构建
+### 方法三：本地构建
 
-**Android 本地构建**
+**Android**
 ```bash
-# 1. 安装 Android Studio 和 Android SDK
-# 2. 配置环境变量
-
-# 3. 运行构建
+# 需要 Android Studio
 npm run android
 
-# 4. 生成 APK
-cd android
-./gradlew assembleRelease
-
-# APK 位置：android/app/build/outputs/apk/release/app-release.apk
+# 生成发布版 APK
+cd android && ./gradlew assembleRelease
 ```
 
-**iOS 本地构建**
+**iOS**
 ```bash
 # 需要 Mac 和 Xcode
-
-# 1. 安装 CocoaPods
-sudo gem install cocoapods
-
-# 2. 安装依赖
-cd ios
-pod install
-
-# 3. 打开 Xcode
-open YourApp.xcworkspace
-
-# 4. 在 Xcode 中构建和运行
+cd ios && pod install
+npm run ios
 ```
-
 
 ---
 
-## 💻 程序概要设计
+## 🏗️ 技术架构
 
 ### 技术栈
 
-#### 前端框架
-- **React Native** - 跨平台移动应用开发框架
-- **Expo** - React Native 开发工具链，简化开发和部署
-- **React Hooks** - 现代化的状态管理和副作用处理
+- **React Native** - 跨平台移动应用框架
+- **Expo** - 开发工具链和部署平台
+- **React Hooks** - 现代化状态管理
+- **Animated API** - 高性能原生动画
+- **AsyncStorage** - 本地数据持久化
+- **Push Notification** - 跨平台通知系统
 
-#### 核心库
-- **React Native Animated** - 高性能动画系统
-- **Platform API** - 平台特定功能适配
-- **Modal** - 模态框组件
-- **ScrollView** - 滚动视图组件
+### 核心模块
 
-### 数据模型
+#### 📅 iCalendar 引擎 (`utils/icalendar.js`)
+- 完整支持 RFC 5545 核心标准
+- 事件创建、编辑、删除（createVEvent, updateVEvent）
+- 重复规则（RRULE）解析和生成
+- 日期时间格式转换
+- 导出为标准 iCalendar 格式
 
-#### 事件对象（VEvent）
-```javascript
-{
-  uid: string,              // 唯一标识符（UUID）
-  summary: string,          // 事件标题
-  description: string,      // 事件描述
-  location: string,         // 事件地点
-  dtstart: string,          // 开始时间（iCalendar 格式）
-  dtend: string,            // 结束时间（iCalendar 格式）
-  isAllDay: boolean,        // 是否全天事件
-  rrule: string,            // 重复规则（RRULE 格式）
-  alarms: Array,            // 提醒列表
-  priority: number,         // 优先级（1-9）
-  status: string,           // 状态（CONFIRMED/TENTATIVE/CANCELLED）
-  categories: Array,        // 分类标签
-  isSubscribed: boolean,    // 是否为订阅事件
-  subscriptionId: string,   // 订阅源ID
-  subscriptionName: string, // 订阅源名称
-}
-```
+#### 🔔 通知系统 (`utils/notifications.js`)
+- 跨平台本地通知推送（react-native-push-notification）
+- 智能权限管理和状态检查
+- 多种提醒时间预设（5分钟到1周前）
+- 通知调度和自动取消
+- Android 通知渠道管理
+- 声音、震动、优先级配置
 
-#### 订阅对象（Subscription）
-```javascript
-{
-  id: string,               // 订阅ID
-  name: string,             // 订阅名称
-  url: string,              // 订阅URL
-  description: string,      // 订阅描述
-  category: string,         // 订阅分类
-  color: string,            // 显示颜色
-  enabled: boolean,         // 是否启用
-  lastSync: number,         // 上次同步时间戳
-  lastSyncStatus: string,   // 同步状态（success/error/pending）
-  lastSyncError: string,    // 错误信息
-  eventCount: number,       // 事件数量
-  refreshInterval: number,  // 刷新间隔（毫秒）
-}
-```
+#### 🌙 农历计算 (`utils/lunar.js`)
+- 1900-2100年农历转换（solarToLunar）
+- 24节气精确计算
+- 传统节日识别
+- 生肖年份显示
+- 重要日期判断
+- 压缩存储，高效查询
 
+#### 🔗 订阅管理 (`utils/subscription.js`)
+- 智能同步机制（syncSubscription）
+- 预设日历源（PRESET_CALENDARS）
+- 错误处理和重试
+- 状态实时更新
+- URL验证和CORS支持
 
-#### 主题对象（Theme）
-```javascript
-{
-  id: string,               // 主题ID
-  name: string,             // 主题名称
-  primary: string,          // 主色（按钮、标题等）
-  secondary: string,        // 次色（选中状态等）
-  accent: string,           // 强调色（特殊元素）
-  success: string,          // 成功色（成功状态）
-  danger: string,           // 危险色（删除、错误等）
-  warning: string,          // 警告色（警告状态）
-  background: string,       // 背景色
-  card: string,             // 卡片色
-  text: string,             // 主文字色
-  textSecondary: string,    // 次要文字色
-  border: string,           // 边框色
-}
-```
+#### 🎨 主题系统 (`utils/themes.js`)
+- 6个精心设计的主题（THEMES）
+- 动态颜色应用（getTheme）
+- 暗色模式优化
+- 实时切换支持
 
-### 核心算法
-
-#### 1. 农历计算算法
-```javascript
-// 基于查表法的农历转换
-// 1. 使用农历数据表（1900-2100年，压缩存储）
-// 2. 计算公历日期与基准日期（1900-01-31）的天数差
-// 3. 根据天数差遍历农历数据表，查找对应的农历日期
-// 4. 计算节气（基于太阳黄经）
-// 5. 识别传统节日（春节、端午、中秋等）
-// 6. 计算生肖（基于农历年份）
-```
-
-#### 2. 重复事件算法（RRULE）
-```javascript
-// 基于 RFC 5545 RRULE 规范
-// 1. 解析 RRULE 字符串（FREQ、INTERVAL、COUNT、BYDAY等）
-// 2. 根据频率（DAILY/WEEKLY/MONTHLY/YEARLY）计算重复日期
-// 3. 应用间隔（INTERVAL）限制
-// 4. 应用次数（COUNT）或结束日期（UNTIL）限制
-// 5. 支持按星期几重复（BYDAY）
-// 6. 生成重复事件实例列表
-```
-
-#### 3. 订阅同步算法
-```javascript
-// 智能同步机制
-// 1. 检查是否需要刷新（基于时间间隔和上次同步时间）
-// 2. 发起 HTTP 请求获取 iCalendar 数据
-// 3. 解析 iCalendar 格式（VCALENDAR/VEVENT/VALARM）
-// 4. 标记事件为订阅事件（添加订阅ID和名称）
-// 5. 更新订阅状态和事件列表
-// 6. 错误处理和重试机制
-// 7. 初始同步失败自动取消订阅
-```
-
-
----
-
-## 🏗️ 软件架构图
-
-### 整体架构
+### 项目结构
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     用户界面层 (UI Layer)                      │
-├─────────────────────────────────────────────────────────────┤
-│  App.js (主应用组件)                                           │
-│  ├── Header (头部导航)                                         │
-│  │   ├── 标题显示                                             │
-│  │   ├── "今天"按钮                                           │
-│  │   └── 主题切换按钮                                         │
-│  ├── ViewSwitcher (视图切换器)                                │
-│  │   ├── 月视图按钮                                           │
-│  │   ├── 周视图按钮                                           │
-│  │   └── 日视图按钮                                           │
-│  ├── Navigation (导航栏)                                       │
-│  │   ├── 上一个按钮                                           │
-│  │   ├── 当前位置显示（可点击跳转）                            │
-│  │   └── 下一个按钮                                           │
-│  ├── ViewContainer (视图容器 - 带动画)                        │
-│  │   ├── MonthView (月视图)                                   │
-│  │   │   ├── 周标题                                           │
-│  │   │   ├── 日期网格                                         │
-│  │   │   ├── 农历显示                                         │
-│  │   │   ├── 节假日标识                                       │
-│  │   │   └── 事件指示器                                       │
-│  │   ├── WeekView (周视图)                                    │
-│  │   │   ├── 周标题                                           │
-│  │   │   ├── 时间轴                                           │
-│  │   │   └── 事件列表                                         │
-│  │   └── DayView (日视图)                                     │
-│  │       ├── 日期标题                                         │
-│  │       ├── 事件统计                                         │
-│  │       └── 事件详情列表                                     │
-│  ├── EventsList (事件列表)                                    │
-│  │   ├── 事件统计                                             │
-│  │   ├── 操作按钮（订阅/导入/导出）                            │
-│  │   ├── 事件卡片列表                                         │
-│  │   └── 订阅事件统计                                         │
-│  └── Modals (模态框)                                          │
-│      ├── EventModal (事件编辑模态框)                          │
-│      │   ├── 基本信息（标题/描述/地点）                        │
-│      │   ├── 时间设置（全天/开始/结束）                        │
-│      │   ├── 重复设置（频率/次数）                            │
-│      │   ├── 提醒设置（时间/方式）                            │
-│      │   └── 优先级设置                                       │
-│      ├── SubscriptionModal (订阅管理模态框)                   │
-│      │   ├── 预设订阅源列表                                   │
-│      │   ├── 我的订阅列表                                     │
-│      │   └── 同步控制                                         │
-│      ├── ThemeModal (主题选择模态框)                          │
-│      │   └── 主题网格                                         │
-│      └── QuickJumpModal (快速跳转模态框)                      │
-│          ├── 年份选择器                                       │
-│          └── 月份网格                                         │
-└─────────────────────────────────────────────────────────────┘
-```
-
-
-### 业务逻辑层
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   业务逻辑层 (Business Layer)                  │
-├─────────────────────────────────────────────────────────────┤
-│  状态管理 (State Management - React Hooks)                    │
-│  ├── events (事件列表)                                         │
-│  ├── subscriptions (订阅列表)                                 │
-│  ├── currentMonth (当前月份)                                  │
-│  ├── selectedDate (选中日期)                                  │
-│  ├── viewType (视图类型: month/week/day)                      │
-│  ├── currentTheme (当前主题)                                  │
-│  ├── modalVisible (模态框显示状态)                            │
-│  └── editingEvent (正在编辑的事件)                            │
-│                                                               │
-│  事件处理器 (Event Handlers)                                  │
-│  ├── onDayPress (日期点击 - 创建事件)                         │
-│  ├── addEvent (添加事件)                                      │
-│  ├── editEvent (编辑事件)                                     │
-│  ├── deleteEvent (删除事件)                                   │
-│  ├── switchView (切换视图 - 带动画)                           │
-│  ├── changeMonth/Week/Day (导航切换)                          │
-│  ├── importCalendar (导入日历)                                │
-│  ├── exportCalendar (导出日历)                                │
-│  ├── addSubscription (添加订阅)                               │
-│  ├── syncSubscription (同步订阅)                              │
-│  ├── removeSubscription (删除订阅)                            │
-│  ├── toggleSubscription (启用/禁用订阅)                       │
-│  └── setCurrentTheme (切换主题)                               │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 工具层
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    工具层 (Utils Layer)                        │
-├─────────────────────────────────────────────────────────────┤
-│  utils/icalendar.js (iCalendar 标准实现)                      │
-│  ├── createVEvent (创建事件对象)                              │
-│  ├── updateVEvent (更新事件对象)                              │
-│  ├── parseICalendar (解析 iCalendar 字符串)                   │
-│  ├── exportToICalendar (导出为 iCalendar 格式)                │
-│  ├── formatICalDate (格式化日期)                              │
-│  ├── parseICalDateTime (解析日期时间)                         │
-│  ├── buildRRule (构建重复规则)                                │
-│  ├── parseRRule (解析重复规则)                                │
-│  ├── getRRuleDescription (获取重复规则描述)                   │
-│  ├── createVAlarm (创建提醒对象)                              │
-│  └── getAlarmDescription (获取提醒描述)                       │
-│                                                               │
-│  utils/lunar.js (农历计算)                                    │
-│  ├── solarToLunar (公历转农历)                                │
-│  ├── getLunarInfo (获取完整农历信息)                          │
-│  ├── getSolarTerm (获取节气)                                  │
-│  ├── getTraditionalFestival (获取传统节日)                    │
-│  └── getZodiac (获取生肖)                                     │
-│                                                               │
-│  utils/subscription.js (订阅管理)                             │
-│  ├── createSubscription (创建订阅对象)                        │
-│  ├── syncSubscription (同步订阅数据)                          │
-│  ├── needsRefresh (检查是否需要刷新)                          │
-│  ├── getSubscriptionStatus (获取订阅状态描述)                 │
-│  ├── validateSubscriptionUrl (验证订阅URL)                    │
-│  └── PRESET_CALENDARS (预设订阅源)                            │
-│                                                               │
-│  utils/themes.js (主题系统)                                   │
-│  ├── THEMES (主题配置对象)                                    │
-│  ├── getTheme (获取指定主题)                                  │
-│  └── getThemeList (获取主题列表)                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-
-### 数据流图
-
-```
-用户操作（点击、输入）
-        ↓
-UI 组件（触发事件）
-        ↓
-事件处理器（业务逻辑）
-        ↓
-工具函数（数据处理）
-        ↓
-状态更新（setState）
-        ↓
-React 状态变化
-        ↓
-Virtual DOM Diff
-        ↓
-UI 重新渲染
-        ↓
-界面更新（用户看到结果）
-```
-
-### 组件通信
-
-```
-App.js (父组件)
-   │
-   ├─ props ↓ (数据传递)
-   │  ├── currentMonth
-   │  ├── events
-   │  ├── theme
-   │  └── callbacks
-   │
-   ├─ MonthView (子组件)
-   │  └─ callback ↑ (onDayPress)
-   │
-   ├─ WeekView (子组件)
-   │  └─ callback ↑ (onEventPress)
-   │
-   └─ DayView (子组件)
-      └─ callback ↑ (onEventPress)
+icalSched/
+├── App.js                    # 主应用组件
+├── components/               # 视图组件
+│   ├── MonthView.js         # 月视图
+│   ├── WeekView.js          # 周视图
+│   └── DayView.js           # 日视图
+├── utils/                   # 核心工具模块
+│   ├── icalendar.js        # iCalendar 标准实现
+│   ├── lunar.js            # 农历计算
+│   ├── subscription.js     # 订阅管理
+│   ├── notifications.js    # 通知系统
+│   └── themes.js           # 主题系统
+├── assets/                 # 资源文件
+├── android/               # Android 原生代码
+├── package.json           # 项目配置
+├── app.json              # Expo 配置
+├── eas.json              # 构建配置
+└── 产品报告.md           # 产品报告文档
 ```
 
 ---
 
-## ✨ 技术亮点及实现原理
+## 🎯 技术亮点
 
 ### 1. 完整的 iCalendar 标准实现
-
-#### 技术亮点
-- ✅ 完整支持 RFC 5545 标准
-- ✅ 与主流日历应用完全兼容
-- ✅ 支持复杂的重复规则（RRULE）
-- ✅ 支持多种提醒方式（VALARM）
-- ✅ 支持事件状态和优先级
-
-#### 实现原理
-
-**事件创建**
-```javascript
-const vevent = createVEvent({
-  summary: '团队会议',
-  dtstart: '20251115T090000',
-  dtend: '20251115T100000',
-  description: '讨论项目进度',
-  location: '会议室A',
-  rrule: 'FREQ=WEEKLY;COUNT=10;BYDAY=MO,WE,FR',
-  alarms: [
-    { trigger: '-PT15M', action: 'DISPLAY' },
-    { trigger: '-PT1H', action: 'AUDIO' }
-  ],
-  priority: 5,
-  status: 'CONFIRMED'
-});
-```
-
-
-**iCalendar 格式生成**
-```
-BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//My Calendar App//EN
-CALSCALE:GREGORIAN
-BEGIN:VEVENT
-UID:unique-id-12345
-DTSTART:20251115T090000
-DTEND:20251115T100000
-SUMMARY:团队会议
-DESCRIPTION:讨论项目进度
-LOCATION:会议室A
-RRULE:FREQ=WEEKLY;COUNT=10;BYDAY=MO,WE,FR
-PRIORITY:5
-STATUS:CONFIRMED
-BEGIN:VALARM
-TRIGGER:-PT15M
-ACTION:DISPLAY
-DESCRIPTION:团队会议
-END:VALARM
-BEGIN:VALARM
-TRIGGER:-PT1H
-ACTION:AUDIO
-END:VALARM
-END:VEVENT
-END:VCALENDAR
-```
-
-**关键技术**
-- 使用 UUID 生成唯一事件标识符
-- 严格遵循 RFC 5545 日期时间格式
-- 支持 RRULE 的完整语法解析
-- 实现 VALARM 的多种触发方式
+- ✅ 支持 RFC 5545 核心规范
+- ✅ 事件创建、编辑、删除功能
+- ✅ 复杂重复规则支持（RRULE）
+- ✅ 与主流日历应用数据格式兼容
 
 ### 2. 精确的农历计算系统
+- ✅ 200年农历数据（1900-2100）
+- ✅ 24节气自动计算
+- ✅ 传统节日识别
+- ✅ 压缩存储，O(1) 查询
 
-#### 技术亮点
-- ✅ 支持 1900-2100 年（200年）农历转换
-- ✅ 包含 24 节气精确计算
-- ✅ 传统节日自动识别
-- ✅ 生肖年份显示
-- ✅ 压缩存储，高效查询
-
-#### 实现原理
-
-**农历数据表（压缩存储）**
-```javascript
-// 每个数字包含一年的农历信息
-// 前12位表示12个月的天数（0=29天，1=30天）
-// 后4位表示闰月月份（0表示无闰月）
-const lunarInfo = [
-  0x04bd8, // 1900年
-  0x04ae0, // 1901年
-  0x0a570, // 1902年
-  // ... 200年数据
-];
-```
-
-
-**转换算法**
-```javascript
-function solarToLunar(date) {
-  // 1. 计算与基准日期（1900-01-31）的天数差
-  const baseDate = new Date(1900, 0, 31);
-  let offset = Math.floor((date - baseDate) / 86400000);
-  
-  // 2. 遍历农历数据表，找到对应的农历年
-  let lunarYear = 1900;
-  let daysInYear = 0;
-  
-  while (offset > daysInYear) {
-    daysInYear = getDaysInLunarYear(lunarYear);
-    if (offset > daysInYear) {
-      offset -= daysInYear;
-      lunarYear++;
-    }
-  }
-  
-  // 3. 计算农历月日
-  let lunarMonth = 1;
-  let daysInMonth = 0;
-  
-  while (offset > daysInMonth) {
-    daysInMonth = getDaysInLunarMonth(lunarYear, lunarMonth);
-    if (offset > daysInMonth) {
-      offset -= daysInMonth;
-      lunarMonth++;
-    }
-  }
-  
-  const lunarDay = offset;
-  
-  // 4. 计算节气
-  const solarTerm = getSolarTerm(date);
-  
-  // 5. 识别传统节日
-  const festival = getTraditionalFestival(lunarMonth, lunarDay);
-  
-  // 6. 计算生肖
-  const zodiac = getZodiac(lunarYear);
-  
-  return {
-    year: lunarYear,
-    month: lunarMonth,
-    day: lunarDay,
-    solarTerm,
-    festival,
-    zodiac,
-    display: `${lunarMonth}月${lunarDay}日`
-  };
-}
-```
-
-**关键技术**
-- 查表法：O(1) 时间复杂度
-- 压缩存储：每年仅需 2 字节
-- 精确计算：误差小于 1 天
-- 完整支持：闰月、节气、节日
-
-
-### 3. 智能订阅同步机制
-
-#### 技术亮点
-- ✅ 自动检测刷新时机
+### 3. 智能订阅同步
+- ✅ 自动检测更新时机
 - ✅ 完善的错误处理和重试
-- ✅ 初始同步失败自动取消
 - ✅ 状态实时更新
-- ✅ 支持 CORS 跨域请求
+- ✅ CORS 跨域支持
 
-#### 实现原理
-
-```javascript
-async function syncSubscription(subscription, parseFunction) {
-  // 1. 检查是否需要刷新
-  if (!needsRefresh(subscription)) {
-    return { success: false, error: '无需刷新' };
-  }
-  
-  try {
-    // 2. 发起 HTTP 请求
-    const response = await fetch(subscription.url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'text/calendar',
-      },
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    
-    // 3. 获取 iCalendar 数据
-    const icalData = await response.text();
-    
-    // 4. 解析 iCalendar 格式
-    const events = parseFunction(icalData);
-    
-    // 5. 标记为订阅事件
-    events.forEach(event => {
-      event.isSubscribed = true;
-      event.subscriptionId = subscription.id;
-      event.subscriptionName = subscription.name;
-      event.subscriptionColor = subscription.color;
-    });
-    
-    // 6. 返回成功结果
-    return {
-      success: true,
-      events,
-      eventCount: events.length,
-      syncTime: Date.now()
-    };
-    
-  } catch (error) {
-    // 7. 错误处理
-    console.error('Sync error:', error);
-    return {
-      success: false,
-      error: error.message,
-      syncTime: Date.now()
-    };
-  }
-}
-
-// 检查是否需要刷新
-function needsRefresh(subscription) {
-  if (!subscription.enabled) return false;
-  if (!subscription.lastSync) return true;
-  
-  const now = Date.now();
-  const elapsed = now - subscription.lastSync;
-  
-  return elapsed >= subscription.refreshInterval;
-}
-```
-
-**关键技术**
-- 智能刷新：基于时间间隔判断
-- 错误处理：捕获网络、解析错误
-- 状态管理：实时更新同步状态
-- 自动取消：初始同步失败自动移除
-
-
-### 4. 完整的主题系统
-
-#### 技术亮点
-- ✅ 6个精心设计的主题
-- ✅ 所有界面元素动态跟随
-- ✅ 暗色模式特殊优化
-- ✅ 实时切换无需重启
-
-#### 实现原理
-
-**主题配置**
-```javascript
-const THEMES = {
-  apple: {
-    id: 'apple',
-    name: '苹果红',
-    primary: '#ff3b30',
-    secondary: '#ff2d55',
-    accent: '#007aff',
-    success: '#34c759',
-    danger: '#ff3b30',
-    warning: '#ff9500',
-    background: '#f2f2f7',
-    card: '#ffffff',
-    text: '#000000',
-    textSecondary: '#8e8e93',
-    border: '#c6c6c8',
-  },
-  appleDark: {
-    id: 'appleDark',
-    name: '暗色模式',
-    primary: '#0a84ff',
-    secondary: '#007aff',
-    accent: '#5ac8fa',
-    success: '#32d74b',
-    danger: '#ff453a',
-    warning: '#ff9f0a',
-    background: '#000000',
-    card: '#1c1c1e',
-    text: '#ffffff',
-    textSecondary: '#8e8e93',
-    border: '#38383a',
-  },
-  // ... 其他主题
-};
-```
-
-**动态应用**
-```javascript
-// 1. 获取当前主题
-const theme = getTheme(currentTheme);
-
-// 2. 应用到组件
-<View style={[styles.container, { 
-  backgroundColor: theme.background 
-}]}>
-  <Text style={[styles.text, { 
-    color: theme.text 
-  }]}>
-    内容
-  </Text>
-  <TouchableOpacity style={[styles.button, { 
-    backgroundColor: theme.primary 
-  }]}>
-    <Text style={{ color: '#fff' }}>按钮</Text>
-  </TouchableOpacity>
-</View>
-
-// 3. 条件样式（暗色模式特殊处理）
-backgroundColor: theme.id === 'appleDark' 
-  ? 'rgba(155, 89, 182, 0.2)'  // 暗色：半透明
-  : '#f3e5f5'                   // 亮色：实色
-```
-
-**关键技术**
-- 配置化：所有颜色集中管理
-- 动态应用：通过 props 传递主题
-- 实时更新：setState 触发重新渲染
-- 特殊优化：暗色模式使用半透明背景
-
-
-### 5. 流畅的动画系统
-
-#### 技术亮点
-- ✅ 使用原生驱动，60fps 流畅
-- ✅ 精确的时序控制
+### 4. 流畅的动画体验
+- ✅ 原生驱动动画（60fps）
+- ✅ 120ms 快速响应
 - ✅ 不阻塞 JS 线程
 - ✅ 优雅的过渡效果
 
-#### 实现原理
+### 5. 完整的主题系统
+- ✅ 6个精美主题
+- ✅ 动态颜色应用
+- ✅ 暗色模式优化
+- ✅ 实时切换
 
-**视图切换动画**
-```javascript
-// 1. 创建动画值
-const [fadeAnim] = useState(new Animated.Value(1));
+### 6. 智能通知提醒系统
+- ✅ 跨平台本地通知推送
+- ✅ 多种提醒时间选项（5分钟到1周前）
+- ✅ 智能权限管理和状态检查
+- ✅ Android 通知渠道优化
+- ✅ 声音、震动、优先级配置
+- ✅ 自动调度和取消机制
 
-// 2. 切换动画
-function switchView(newViewType) {
-  if (newViewType === viewType) return;
-  
-  // 淡出动画
-  Animated.timing(fadeAnim, {
-    toValue: 0,
-    duration: 120,
-    useNativeDriver: true,  // 关键：使用原生驱动
-  }).start(() => {
-    // 在淡出完成后切换视图
-    setViewType(newViewType);
-    
-    // 淡入动画
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 120,
-      useNativeDriver: true,
-    }).start();
-  });
-}
-
-// 3. 应用动画
-<Animated.View style={[
-  styles.viewContainer,
-  { opacity: fadeAnim }  // 绑定动画值
-]}>
-  {/* 视图内容 */}
-</Animated.View>
-```
-
-**动画时序**
-```
-用户点击 → 淡出(120ms) → 切换视图 → 淡入(120ms) → 完成
-总时长：240ms
-```
-
-**关键技术**
-- 原生驱动：`useNativeDriver: true`
-- 回调控制：在淡出完成后切换视图
-- 避免闪烁：先淡出再切换再淡入
-- 性能优化：不阻塞 JS 线程
-
-### 6. 优雅的交互设计
-
-#### 技术亮点
-- ✅ 开关控制结束日期
-- ✅ 布局完全稳定
-- ✅ 一步启用/禁用
-- ✅ 符合用户习惯
-
-#### 实现原理
-
-**结束日期控制**
-```javascript
-// 1. 开关控制
-<View style={styles.switchRow}>
-  <Text>设置结束日期</Text>
-  <TouchableOpacity
-    style={[styles.switch, endDate && { 
-      backgroundColor: theme.primary 
-    }]}
-    onPress={() => {
-      if (endDate) {
-        setEndDate('');  // 关闭：清空
-      } else {
-        setEndDate(selectedDate);  // 打开：设置默认值
-      }
-    }}
-  >
-    <View style={[
-      styles.switchThumb,
-      endDate && styles.switchThumbActive
-    ]} />
-  </TouchableOpacity>
-</View>
-
-// 2. 条件渲染日期选择器
-{endDate && (
-  <View style={styles.datePickerContainer}>
-    <TouchableOpacity onPress={decreaseDate}>
-      <Text>−</Text>
-    </TouchableOpacity>
-    <View style={styles.datePicker}>
-      <Text>{endDate}</Text>
-    </View>
-    <TouchableOpacity onPress={increaseDate}>
-      <Text>+</Text>
-    </TouchableOpacity>
-  </View>
-)}
-```
-
-**优势**
-- 布局稳定：整个选择器条件渲染
-- 交互简单：一步启用/禁用
-- 视觉统一：与其他开关保持一致
-- 默认合理：打开时默认为开始日期
-
-
-### 7. 性能优化策略
-
-#### 技术亮点
-- ✅ 原生驱动动画（60fps）
-- ✅ 避免不必要的重新渲染
-- ✅ 条件渲染优化
-- ✅ 高效的状态管理
-
-#### 实现细节
-
-**1. 原生驱动动画**
-```javascript
-Animated.timing(fadeAnim, {
-  toValue: 1,
-  duration: 120,
-  useNativeDriver: true,  // 关键：使用原生驱动
-})
-```
-- 动画在原生层执行
-- 不阻塞 JS 线程
-- 保证 60fps 流畅
-
-**2. 避免条件渲染导致的重排**
-```javascript
-// 使用 opacity 而不是条件渲染
-<TouchableOpacity
-  style={[
-    styles.button,
-    { opacity: isVisible ? 1 : 0 }
-  ]}
-  disabled={!isVisible}
->
-  <Text>按钮</Text>
-</TouchableOpacity>
-```
-- 元素始终存在
-- 通过透明度控制显示
-- 避免布局重排
-
-**3. 状态更新优化**
-```javascript
-// 基于前一个状态更新
-setState(prevState => {
-  return {
-    ...prevState,
-    newValue: value
-  };
-});
-```
-- 避免状态冲突
-- 确保更新正确
-- 提高性能
-
-**4. 事件处理优化**
-```javascript
-<TouchableOpacity
-  activeOpacity={0.7}  // 即时反馈
-  onPress={handlePress}
->
-  <Text>按钮</Text>
-</TouchableOpacity>
-```
-- 即时视觉反馈
-- 提升用户体验
-
----
-
-## 📁 项目结构
-
-```
-calendar-app/
-├── App.js                          # 主应用组件（2300+ 行）
-├── components/                     # 视图组件目录
-│   ├── MonthView.js               # 月视图组件（300+ 行）
-│   ├── WeekView.js                # 周视图组件（250+ 行）
-│   └── DayView.js                 # 日视图组件（250+ 行）
-├── utils/                         # 工具模块目录
-│   ├── icalendar.js              # iCalendar 标准实现（800+ 行）
-│   ├── lunar.js                  # 农历计算模块（400+ 行）
-│   ├── subscription.js           # 订阅管理模块（200+ 行）
-│   └── themes.js                 # 主题系统（100+ 行）
-├── assets/                        # 资源文件目录
-├── .expo/                         # Expo 配置目录
-├── node_modules/                  # 依赖包目录
-├── package.json                   # 项目配置文件
-├── app.json                       # Expo 应用配置
-├── babel.config.js                # Babel 配置
-└── README.md                      # 项目说明文档
-```
-
-
----
-
-## 📱 移动端部署指南
-
-### Android 部署
-
-#### 开发环境要求
-- Node.js >= 14.0.0
-- Android Studio
-- Android SDK (API 21+)
-- Java Development Kit (JDK)
-
-#### 快速部署步骤
-
-1. **使用 Expo Go（最简单）**
-   ```bash
-   # 启动开发服务器
-   npm start
-   
-   # 在手机上安装 Expo Go
-   # 扫描二维码即可运行
-   ```
-
-2. **构建 APK（推荐）**
-   ```bash
-   # 安装 EAS CLI
-   npm install -g eas-cli
-   
-   # 登录
-   eas login
-   
-   # 构建
-   eas build --platform android --profile preview
-   
-   # 下载 APK 并安装到手机
-   ```
-
-3. **本地构建**
-   ```bash
-   # 运行 Android 模拟器或连接真机
-   npm run android
-   
-   # 生成发布版 APK
-   cd android
-   ./gradlew assembleRelease
-   ```
-
-#### 常见问题
-
-**问题 1：无法连接到开发服务器**
-- 确保手机和电脑在同一 WiFi
-- 使用隧道模式：`npm start --tunnel`
-- 检查防火墙设置
-
-**问题 2：构建失败**
-- 清理缓存：`npm start -- --clear`
-- 删除 node_modules 重新安装
-- 检查 Android SDK 版本
-
-### iOS 部署
-
-#### 开发环境要求
-- macOS
-- Xcode 12+
-- CocoaPods
-- Apple Developer 账号（用于真机测试和发布）
-
-#### 快速部署步骤
-
-1. **使用 Expo Go（最简单）**
-   ```bash
-   # 启动开发服务器
-   npm start
-   
-   # 在 iPhone 上安装 Expo Go
-   # 扫描二维码即可运行
-   ```
-
-2. **构建 iOS 应用**
-   ```bash
-   # 安装 EAS CLI
-   npm install -g eas-cli
-   
-   # 登录
-   eas login
-   
-   # 构建
-   eas build --platform ios --profile preview
-   
-   # 通过 TestFlight 分发
-   ```
-
-3. **本地构建**
-   ```bash
-   # 安装 CocoaPods
-   sudo gem install cocoapods
-   
-   # 安装依赖
-   cd ios
-   pod install
-   
-   # 运行
-   npm run ios
-   ```
-
-#### 常见问题
-
-**问题 1：CocoaPods 安装失败**
-- 更新 Ruby：`brew install ruby`
-- 使用国内镜像：`gem sources --add https://gems.ruby-china.com/`
-
-**问题 2：证书问题**
-- 在 Xcode 中配置开发者账号
-- 选择正确的 Team 和 Provisioning Profile
-
-### 性能优化建议
-
-1. **启用 Hermes 引擎**（Android）
-   - 在 `android/app/build.gradle` 中启用
-   - 提升启动速度和性能
-
-2. **优化图片资源**
-   - 使用适当的图片尺寸
-   - 考虑使用 WebP 格式
-
-3. **减少包体积**
-   - 移除未使用的依赖
-   - 启用代码压缩
-
----
-
-## 🛠️ 开发指南
-
-### 代码规范
-
-- 使用 ES6+ 语法
-- 组件使用函数式组件和 Hooks
-- 遵循 React Native 最佳实践
-- 代码格式化使用 Prettier
-
-### 添加新功能
-
-1. **添加新视图**
-   - 在 `components/` 目录创建新组件
-   - 在 `App.js` 中导入并使用
-   - 添加视图切换逻辑
-
-2. **添加新工具函数**
-   - 在 `utils/` 目录创建或修改模块
-   - 导出函数供其他模块使用
-   - 添加必要的注释
-
-3. **添加新主题**
-   - 在 `utils/themes.js` 中添加主题配置
-   - 确保包含所有必需的颜色属性
-   - 测试在不同界面的显示效果
-
-### 调试技巧
-
-1. **使用 React Native Debugger**
-```bash
-# 启动应用后，在浏览器中打开
-http://localhost:19002
-```
-
-2. **查看日志**
-```bash
-# 查看所有日志
-npm start
-
-# 查看 Android 日志
-adb logcat
-
-# 查看 iOS 日志
-xcrun simctl spawn booted log stream
-```
-
-3. **性能分析**
-- 使用 React DevTools
-- 检查 Animated 性能
-- 监控内存使用
+### 7. iOS风格UI设计
+- ✅ 卡片式布局
+- ✅ 底部对齐操作按钮
+- ✅ 流畅的过渡动画
+- ✅ 大触摸区域（44x44px）
+- ✅ 清晰的视觉反馈
 
 ---
 
 ## 📊 项目统计
 
-### 代码统计
-- **总代码行数**：9600+
-- **主应用**：2300+ 行
-- **视图组件**：800+ 行
-- **工具模块**：1500+ 行
-- **文档说明**：5000+ 行
-
-### 功能统计
-- **基本功能**：7 项 ✅
-- **扩展功能**：38 项 ✅
-- **界面优化**：8 项 ✅
-- **总计**：53+ 功能
-
-### 技术统计
-- **组件数量**：4 个（主应用 + 3个视图）
-- **工具模块**：4 个
-- **主题数量**：6 个
-- **支持平台**：3 个（iOS/Android/Web）
+- **代码行数**：4500+ 行
+- **功能模块**：5 个核心模块
+- **视图组件**：3 个主要视图（月/周/日）
+- **支持主题**：6 个精美主题
+- **支持平台**：iOS / Android / Web
+- **农历范围**：1900-2100年（200年）
+- **模态框**：4 个（事件编辑、订阅管理、主题选择、快速跳转）
+- **核心功能**：事件管理、订阅同步、农历显示、主题切换、智能提醒
+- **UI组件**：iOS风格卡片、开关、按钮、时间选择器、日期选择器
 
 ---
 
-## 🤝 贡献指南
+## 📖 使用指南
 
-欢迎贡献代码、报告问题或提出建议！
+### 🔔 事件提醒功能
 
-### 如何贡献
+#### 设置事件提醒
 
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
+1. **添加新事件**
+   - 点击右下角的 "+" 按钮
+   - 填写事件标题、日期和时间
+   - 在"提醒设置"部分选择需要的提醒时间
+   - 支持多个提醒时间同时设置
 
-### 报告问题
+2. **提醒时间选项**
+   - 5分钟前、15分钟前、30分钟前
+   - 1小时前、2小时前
+   - 1天前、2天前、1周前
 
-如果发现 Bug 或有功能建议，请[创建 Issue](https://github.com/yourusername/calendar-app/issues)。
+#### 通知权限管理
+
+**首次使用**
+- 应用会自动请求通知权限
+- Android 13+ 会显示系统权限对话框
+- iOS 会显示通知权限请求
+
+**权限状态检查**
+- 主界面显示当前权限状态
+- 绿色✅表示已授权，红色❌表示未授权
+- 可随时重新请求权限
+
+**测试通知功能**
+- 在权限卡片中点击"测试通知"
+- 立即发送测试通知验证功能
+- 检查通知栏是否收到测试消息
+
+#### 故障排除
+
+**通知不显示**
+1. 检查应用通知权限是否开启
+2. 确认系统勿扰模式设置
+3. 检查设备音量和震动设置
+4. 使用"测试通知"功能验证
+
+**Android 特定问题**
+- 部分厂商ROM需要允许应用自启动
+- 关闭电池优化以确保后台运行
+- 检查通知渠道设置
+
+### 📅 基本功能使用
+
+#### 创建事件
+1. 点击日期或右下角"+"按钮
+2. 填写事件信息
+3. 设置提醒时间（可选）
+4. 点击"添加事件"
+
+#### 查看事件
+- 月视图：点击日期查看当日事件
+- 事件列表：显示所有事件及提醒设置
+- 事件详情：显示完整事件信息
+
+#### 删除事件
+- 点击事件卡片右侧的🗑️按钮
+- 确认删除操作
+- 相关提醒通知会自动取消
+
+#### 订阅日历
+1. 点击"订阅"按钮打开订阅管理
+2. 选择预设订阅源
+3. 点击"订阅"按钮
+4. 等待同步完成
+5. 订阅事件会自动显示在日历中
+
+#### 切换主题
+1. 点击"主题"按钮
+2. 选择喜欢的主题
+3. 主题立即生效
+
+---
+
+## 🛠️ 开发指南
+
+### 添加新功能
+
+1. **新视图组件**：在 `components/` 目录创建
+2. **新工具模块**：在 `utils/` 目录创建
+3. **新主题**：在 `utils/themes.js` 中添加
+
+### 调试技巧
+
+```bash
+# 查看日志
+npm start
+
+# React Native Debugger
+# 浏览器打开 http://localhost:19002
+
+# Android 日志
+adb logcat
+
+# iOS 日志
+xcrun simctl spawn booted log stream
+```
+
+### 代码规范
+
+- 使用 ES6+ 语法
+- 函数式组件 + Hooks
+- 遵循 React Native 最佳实践
+- 代码注释完整
+- 遵循 iOS 设计规范
+
+---
+
+## 📄 产品报告
+
+详细的产品报告请查看 [产品报告.md](./产品报告.md)，包含：
+- 产品功能介绍
+- 程序概要设计
+- 软件架构图
+- 技术亮点和实现原理
+
+
 
 ---
 
@@ -1284,27 +452,12 @@ xcrun simctl spawn booted log stream
 
 ---
 
-## 👨‍💻 作者
-
-**React Native Calendar App**
-
----
-
 ## 🙏 致谢
 
 - [React Native](https://reactnative.dev/) - 跨平台移动应用框架
-- [Expo](https://expo.dev/) - React Native 开发工具链
+- [Expo](https://expo.dev/) - 开发工具链
 - [RFC 5545](https://tools.ietf.org/html/rfc5545) - iCalendar 标准
-- 所有开源贡献者
-
----
-
-## 📮 联系方式
-
-如有问题或建议，欢迎通过以下方式联系：
-
-- 📧 Email: your.email@example.com
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/calendar-app/issues)
+- 开源社区的贡献者们
 
 ---
 
@@ -1312,6 +465,6 @@ xcrun simctl spawn booted log stream
 
 **⭐ 如果这个项目对你有帮助，请给它一个星标！**
 
-Made with ❤️ by React Native Calendar Team
+Made with ❤️ by iCalSched Team
 
 </div>

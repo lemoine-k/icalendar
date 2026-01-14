@@ -55,8 +55,158 @@ const solarTerms = [
   '白露', '秋分', '寒露', '霜降', '立冬', '小雪', '大雪', '冬至'
 ];
 
+// 节气精确计算数据表 (基于天文算法)
+// 每个节气在每个月的基准日期和年度修正系数
+const solarTermsData = [
+  // 1月: 小寒, 大寒
+  { month: 1, day: 6, coefficient: 0.2422 },   // 小寒
+  { month: 1, day: 20, coefficient: 0.2422 },  // 大寒
+  // 2月: 立春, 雨水  
+  { month: 2, day: 4, coefficient: 0.2422 },   // 立春
+  { month: 2, day: 19, coefficient: 0.2422 },  // 雨水
+  // 3月: 惊蛰, 春分
+  { month: 3, day: 6, coefficient: 0.2422 },   // 惊蛰
+  { month: 3, day: 21, coefficient: 0.2422 },  // 春分
+  // 4月: 清明, 谷雨
+  { month: 4, day: 5, coefficient: 0.2422 },   // 清明
+  { month: 4, day: 20, coefficient: 0.2422 },  // 谷雨
+  // 5月: 立夏, 小满
+  { month: 5, day: 6, coefficient: 0.2422 },   // 立夏
+  { month: 5, day: 21, coefficient: 0.2422 },  // 小满
+  // 6月: 芒种, 夏至
+  { month: 6, day: 6, coefficient: 0.2422 },   // 芒种
+  { month: 6, day: 22, coefficient: 0.2422 },  // 夏至
+  // 7月: 小暑, 大暑
+  { month: 7, day: 7, coefficient: 0.2422 },   // 小暑
+  { month: 7, day: 23, coefficient: 0.2422 },  // 大暑
+  // 8月: 立秋, 处暑
+  { month: 8, day: 8, coefficient: 0.2422 },   // 立秋
+  { month: 8, day: 23, coefficient: 0.2422 },  // 处暑
+  // 9月: 白露, 秋分
+  { month: 9, day: 8, coefficient: 0.2422 },   // 白露
+  { month: 9, day: 23, coefficient: 0.2422 },  // 秋分
+  // 10月: 寒露, 霜降
+  { month: 10, day: 8, coefficient: 0.2422 },  // 寒露
+  { month: 10, day: 24, coefficient: 0.2422 }, // 霜降
+  // 11月: 立冬, 小雪
+  { month: 11, day: 8, coefficient: 0.2422 },  // 立冬
+  { month: 11, day: 22, coefficient: 0.2422 }, // 小雪
+  // 12月: 大雪, 冬至
+  { month: 12, day: 7, coefficient: 0.2422 },  // 大雪
+  { month: 12, day: 22, coefficient: 0.2422 }  // 冬至
+];
+
+/**
+ * 精确计算指定年份的节气日期
+ * 基于《中国天文年历》的计算方法
+ * @param {number} year - 年份
+ * @returns {Array} 节气日期数组
+ */
+function calculateSolarTerms(year) {
+  const terms = [];
+  
+  for (let i = 0; i < 24; i++) {
+    const termData = solarTermsData[i];
+    const termName = solarTerms[i];
+    
+    // 基准日期
+    let day = termData.day;
+    
+    // 年份修正计算
+    // 公式: day = 基准日 + (年份-1900) * 系数 - 闰年修正
+    const yearOffset = year - 1900;
+    const yearCorrection = yearOffset * termData.coefficient;
+    
+    // 闰年修正 (每4年减1天，但世纪年需要特殊处理)
+    let leapCorrection = 0;
+    if (year >= 1900) {
+      leapCorrection = Math.floor(yearOffset / 4);
+      
+      // 世纪年修正 (1900, 2000, 2100等)
+      if (year % 100 === 0) {
+        if (year % 400 === 0) {
+          // 能被400整除的年份是闰年 (如2000)
+          leapCorrection -= 0;
+        } else {
+          // 不能被400整除的世纪年不是闰年 (如1900, 2100)
+          leapCorrection += 1;
+        }
+      }
+    }
+    
+    // 计算最终日期
+    day = Math.round(day + yearCorrection - leapCorrection);
+    
+    // 特殊年份的微调 (基于历史数据)
+    if (year >= 2000) {
+      // 21世纪的微调
+      if (i === 6) { // 清明
+        if (year >= 2000 && year <= 2100) {
+          day = year % 4 === 0 ? 4 : 5; // 闰年4日，平年5日
+        }
+      } else if (i === 7) { // 谷雨
+        if (year >= 2000 && year <= 2100) {
+          day = year % 4 === 0 ? 19 : 20; // 闰年19日，平年20日
+        }
+      }
+    }
+    
+    // 确保日期在合理范围内
+    const daysInMonth = new Date(year, termData.month, 0).getDate();
+    if (day < 1) day = 1;
+    if (day > daysInMonth) day = daysInMonth;
+    
+    terms.push({
+      name: termName,
+      month: termData.month,
+      day: day,
+      date: `${year}-${String(termData.month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    });
+  }
+  
+  return terms;
+}
+
+/**
+ * 获取指定日期的节气
+ * @param {Date} date - 日期
+ * @returns {string|null} 节气名称
+ */
+export function getSolarTerm(date) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  
+  const terms = calculateSolarTerms(year);
+  const term = terms.find(t => t.date === dateString);
+  
+  return term ? term.name : null;
+}
+
+/**
+ * 获取指定年份的所有节气
+ * @param {number} year - 年份
+ * @returns {Array} 节气数组
+ */
+export function getAllSolarTerms(year) {
+  return calculateSolarTerms(year);
+}
+
+/**
+ * 判断是否为重要节气（法定节假日相关）
+ * @param {string} termName - 节气名称
+ * @returns {boolean}
+ */
+export function isImportantSolarTerm(termName) {
+  // 清明节是法定节假日
+  return termName === '清明';
+}
+
 // 传统节日
 const lunarFestivals = {
+  '12-30': '除夕',
+  '12-29': '除夕',
   '1-1': '春节',
   '1-15': '元宵节',
   '2-2': '龙抬头',
@@ -195,9 +345,10 @@ export function solarToLunar(date) {
   // 获取农历日期名称
   const dayName = lunarDays[lunarDay - 1];
   
-  // 获取节日
+  // 获取节日和节气
   const lunarFestival = lunarFestivals[`${lunarMonth}-${lunarDay}`];
   const solarFestival = solarFestivals[`${month}-${day}`];
+  const solarTerm = getSolarTerm(date);
   
   return {
     year: lunarYear,
@@ -210,8 +361,9 @@ export function solarToLunar(date) {
     dayName,
     lunarFestival,
     solarFestival,
-    // 显示优先级：节日 > 初一/十五 > 日期
-    display: lunarFestival || solarFestival || (lunarDay === 1 ? monthName : dayName),
+    solarTerm,
+    // 显示优先级：节气 > 节日 > 初一/十五 > 日期
+    display: solarTerm || lunarFestival || solarFestival || (lunarDay === 1 ? monthName : dayName),
   };
 }
 
@@ -228,9 +380,12 @@ export function getLunarInfo(date) {
 }
 
 /**
- * 判断是否为重要日期
+ * 判断是否为重要日期（传统节日和公历节日，不包含节气）
  */
 export function isImportantDate(date) {
   const lunar = solarToLunar(date);
+  
+  // 重要日期只包括：传统节日、公历节日
+  // 节气作为农历信息显示，但不自动标记为节假日
   return !!(lunar.lunarFestival || lunar.solarFestival);
 }

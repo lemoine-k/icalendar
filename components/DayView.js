@@ -1,41 +1,49 @@
+import React, { useMemo, memo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { Calendar, Edit, Lock, MapPin } from 'lucide-react-native';
 import { parseICalDate } from '../utils/icalendar';
 import { getLunarInfo } from '../utils/lunar';
 
-export default function DayView({ 
+function DayView({ 
   selectedDate, 
   events, 
+  subscribedEvents,
   onEventPress,
-  theme 
+  theme,
+  style
 }) {
-  const date = selectedDate ? new Date(selectedDate) : new Date();
+  if (style?.display === 'none') {
+    return null;
+  }
+  const date = useMemo(() => selectedDate ? new Date(selectedDate) : new Date(), [selectedDate]);
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
-  // 获取当天的所有事件
-  const getDayEvents = () => {
+  const dayEvents = useMemo(() => {
     const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const icalDate = dateString.replace(/-/g, '');
     
     return events.filter(event => {
-      // 检查日期部分是否匹配（支持 DATE 和 DATE-TIME 格式）
+      const eventDatePart = event.dtstart.substring(0, 8);
+      return eventDatePart === icalDate && !event.isSubscribed;
+    });
+  }, [date, events]);
+
+  const isToday = useMemo(() => new Date().toDateString() === date.toDateString(), [date]);
+  
+  const daySubscribedEvents = useMemo(() => {
+    const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const icalDate = dateString.replace(/-/g, '');
+    
+    return subscribedEvents.filter(event => {
       const eventDatePart = event.dtstart.substring(0, 8);
       return eventDatePart === icalDate;
     });
-  };
-
-  const dayEvents = getDayEvents();
-  const isToday = new Date().toDateString() === date.toDateString();
+  }, [date, subscribedEvents]);
   
-  // 分类事件
-  const subscribedEvents = dayEvents.filter(e => e.isSubscribed);
-  const regularEvents = dayEvents.filter(e => !e.isSubscribed);
-  
-  // 检查是否为节假日
-  const isHoliday = subscribedEvents.some(e => 
+  const isHoliday = useMemo(() => daySubscribedEvents.some(e => 
     e.subscriptionId && e.subscriptionId.includes('holiday')
-  );
+  ), [daySubscribedEvents]);
   
-  // 检查是否为周末
   const dayOfWeek = date.getDay();
   const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
@@ -88,14 +96,14 @@ export default function DayView({
         )}
         {dayEvents.length > 0 && (
           <View style={styles.eventSummary}>
-            {subscribedEvents.length > 0 && (
+            {daySubscribedEvents.length > 0 && (
               <Text style={[styles.eventCountText, { color: theme?.textSecondary || '#666' }]}>
-                📅 订阅事件: {subscribedEvents.length} 个
+                订阅事件: {daySubscribedEvents.length} 个
               </Text>
             )}
-            {regularEvents.length > 0 && (
+            {dayEvents.length > 0 && (
               <Text style={[styles.eventCountText, { color: theme?.textSecondary || '#666' }]}>
-                ✏️ 个人事件: {regularEvents.length} 个
+                个人事件: {dayEvents.length} 个
               </Text>
             )}
           </View>
@@ -104,114 +112,174 @@ export default function DayView({
 
       {/* 时间轴 */}
       <ScrollView style={styles.scrollView}>
-        {hours.map(hour => (
+        {hours.map(hour => {
+          // 获取当前小时的事件
+          const hourEvents = dayEvents.filter(event => {
+            if (event.isAllDay) return hour === 0; // 全天事件显示在顶部
+            
+            // 解析事件开始时间
+            const dtstart = event.dtstart;
+            if (dtstart.length >= 13) {
+              const eventHour = parseInt(dtstart.substring(9, 11));
+              return eventHour === hour;
+            }
+            return hour === 0; // 如果无法解析，显示在顶部
+          });
+          
+          const hourSubscribedEvents = hourEvents.filter(e => e.isSubscribed);
+          const hourRegularEvents = hourEvents.filter(e => !e.isSubscribed);
+          
+          return (
           <View key={hour} style={styles.hourRow}>
             <View style={styles.timeColumn}>
               <Text style={styles.timeText}>{String(hour).padStart(2, '0')}:00</Text>
             </View>
             <View style={styles.eventColumn}>
-              {hour === 0 && dayEvents.length > 0 && (
+              {hourEvents.length > 0 && (
                 <View style={styles.eventBlock}>
                   {/* 订阅事件 */}
-                  {subscribedEvents.length > 0 && (
+                  {hourSubscribedEvents.length > 0 && (
                     <View style={styles.eventSection}>
-                      <Text style={[styles.sectionTitle, { color: theme?.text || '#333' }]}>
-                        📅 订阅事件
-                      </Text>
-                      {subscribedEvents.map(event => (
-                        <TouchableOpacity
-                          key={event.uid}
-                          style={[
-                            styles.eventItem,
-                            styles.subscribedEvent,
-                            { 
-                              borderLeftColor: event.subscriptionColor || theme?.accent || '#9b59b6',
-                              backgroundColor: theme?.id === 'appleDark' ? 'rgba(155, 89, 182, 0.2)' : '#f3e5f5'
-                            }
-                          ]}
-                          onPress={() => onEventPress(event)}
-                          activeOpacity={0.7}
-                        >
-                          <View style={styles.eventHeader}>
-                            <Text style={[styles.eventTitle, { color: theme?.text || '#333' }]}>
-                              {event.summary}
+                      {hour === 0 && <Text style={[styles.sectionTitle, { color: theme?.text || '#333' }]}>
+                        订阅事件
+                      </Text>}
+                      {hourSubscribedEvents.map(event => {
+                        const getTimeRange = () => {
+                          if (event.isAllDay) return '全天事件';
+                          const dtstart = event.dtstart;
+                          const dtend = event.dtend;
+                          if (dtstart.length >= 13 && dtend.length >= 13) {
+                            const startTime = `${dtstart.substring(9, 11)}:${dtstart.substring(11, 13)}`;
+                            const endTime = `${dtend.substring(9, 11)}:${dtend.substring(11, 13)}`;
+                            return `${startTime} - ${endTime}`;
+                          }
+                          return '';
+                        };
+                        
+                        return (
+                          <TouchableOpacity
+                            key={event.uid}
+                            style={[
+                              styles.eventItem,
+                              styles.subscribedEvent,
+                              { 
+                                borderLeftColor: event.subscriptionColor || theme?.accent || '#9b59b6',
+                                backgroundColor: theme?.id === 'appleDark' ? 'rgba(155, 89, 182, 0.2)' : '#f3e5f5'
+                              }
+                            ]}
+                            onPress={() => onEventPress(event)}
+                            activeOpacity={0.7}
+                          >
+                            <View style={styles.eventHeader}>
+                              <Text style={[styles.eventTitle, { color: theme?.text || '#333' }]}>
+                                {event.summary}
+                              </Text>
+                              <View style={[
+                                styles.subscriptionBadge,
+                                { backgroundColor: event.subscriptionColor || theme?.accent || '#9b59b6' }
+                              ]}>
+                                <Text style={styles.subscriptionBadgeText}>
+                                  {event.subscriptionName || '订阅'}
+                                </Text>
+                              </View>
+                            </View>
+                            <Text style={[styles.eventTime, { 
+                              color: event.subscriptionColor || theme?.accent || '#9b59b6'
+                            }]}>
+                              {getTimeRange()}
                             </Text>
-                            <View style={[
-                              styles.subscriptionBadge,
-                              { backgroundColor: event.subscriptionColor || theme?.accent || '#9b59b6' }
-                            ]}>
-                              <Text style={styles.subscriptionBadgeText}>
-                                {event.subscriptionName || '订阅'}
+                            {event.description ? (
+                              <Text style={[styles.eventDescription, { color: theme?.textSecondary || '#666' }]} numberOfLines={2}>
+                                {event.description}
+                              </Text>
+                            ) : null}
+                            <View style={styles.readonlyContainer}>
+                              <Lock size={12} color={theme?.textSecondary || '#999'} />
+                              <Text style={[styles.readonlyText, { color: theme?.textSecondary || '#999' }]}>
+                                只读事件
                               </Text>
                             </View>
-                          </View>
-                          {event.description ? (
-                            <Text style={[styles.eventDescription, { color: theme?.textSecondary || '#666' }]} numberOfLines={2}>
-                              {event.description}
-                            </Text>
-                          ) : null}
-                          <Text style={[styles.readonlyText, { color: theme?.textSecondary || '#999' }]}>
-                            🔒 只读事件
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
+                          </TouchableOpacity>
+                        );
+                      })}
                     </View>
                   )}
                   
                   {/* 普通事件 */}
-                  {regularEvents.length > 0 && (
+                  {hourRegularEvents.length > 0 && (
                     <View style={styles.eventSection}>
-                      <Text style={[styles.sectionTitle, { color: theme?.text || '#333' }]}>
-                        ✏️ 个人事件
-                      </Text>
-                      {regularEvents.map(event => (
-                        <TouchableOpacity
-                          key={event.uid}
-                          style={[
-                            styles.eventItem,
-                            { 
-                              backgroundColor: theme?.id === 'appleDark' ? 'rgba(10, 132, 255, 0.2)' : '#f0f7ff',
-                              borderLeftColor: theme?.primary || '#4A90E2'
-                            }
-                          ]}
-                          onPress={() => onEventPress(event)}
-                          activeOpacity={0.7}
-                        >
-                          <View style={styles.eventHeader}>
-                            <Text style={[styles.eventTitle, { color: theme?.text || '#333' }]}>
-                              {event.summary}
-                            </Text>
-                            <View style={[styles.priorityBadge, { backgroundColor: theme?.primary || '#4A90E2' }]}>
-                              <Text style={styles.priorityText}>P{event.priority}</Text>
+                      {hour === 0 && <Text style={[styles.sectionTitle, { color: theme?.text || '#333' }]}>
+                        个人事件
+                      </Text>}
+                      {hourRegularEvents.map(event => {
+                        const getTimeRange = () => {
+                          if (event.isAllDay) return '全天事件';
+                          const dtstart = event.dtstart;
+                          const dtend = event.dtend;
+                          if (dtstart.length >= 13 && dtend.length >= 13) {
+                            const startTime = `${dtstart.substring(9, 11)}:${dtstart.substring(11, 13)}`;
+                            const endTime = `${dtend.substring(9, 11)}:${dtend.substring(11, 13)}`;
+                            return `${startTime} - ${endTime}`;
+                          }
+                          return '';
+                        };
+                        
+                        return (
+                          <TouchableOpacity
+                            key={event.uid}
+                            style={[
+                              styles.eventItem,
+                              { 
+                                backgroundColor: theme?.id === 'appleDark' ? 'rgba(10, 132, 255, 0.2)' : '#f0f7ff',
+                                borderLeftColor: theme?.primary || '#4A90E2'
+                              }
+                            ]}
+                            onPress={() => onEventPress(event)}
+                            activeOpacity={0.7}
+                          >
+                            <View style={styles.eventHeader}>
+                              <Text style={[styles.eventTitle, { color: theme?.text || '#333' }]}>
+                                {event.summary}
+                              </Text>
+                              <View style={[styles.priorityBadge, { backgroundColor: theme?.primary || '#4A90E2' }]}>
+                                <Text style={styles.priorityText}>P{event.priority}</Text>
+                              </View>
                             </View>
-                          </View>
-                          {event.description ? (
-                            <Text style={[styles.eventDescription, { color: theme?.textSecondary || '#666' }]} numberOfLines={2}>
-                              {event.description}
+                            <Text style={[styles.eventTime, { color: theme?.primary || '#4A90E2' }]}>
+                              {getTimeRange()}
                             </Text>
-                          ) : null}
-                          {event.location ? (
-                            <Text style={[styles.eventLocation, { color: theme?.textSecondary || '#666' }]}>
-                              📍 {event.location}
+                            {event.description ? (
+                              <Text style={[styles.eventDescription, { color: theme?.textSecondary || '#666' }]} numberOfLines={2}>
+                                {event.description}
+                              </Text>
+                            ) : null}
+                            {event.location ? (
+                              <View style={styles.locationContainer}>
+                                <MapPin size={12} color={theme?.textSecondary || '#666'} />
+                                <Text style={[styles.eventLocation, { color: theme?.textSecondary || '#666' }]}>
+                                  {event.location}
+                                </Text>
+                              </View>
+                            ) : null}
+                            <Text style={[styles.eventStatus, { color: theme?.success || '#28a745' }]}>
+                              状态: {event.status}
                             </Text>
-                          ) : null}
-                          <Text style={[styles.eventStatus, { color: theme?.success || '#28a745' }]}>
-                            状态: {event.status}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
+                          </TouchableOpacity>
+                        );
+                      })}
                     </View>
                   )}
                 </View>
               )}
             </View>
           </View>
-        ))}
+        );
+        })}
       </ScrollView>
 
       {dayEvents.length === 0 && (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>📅</Text>
+          <Calendar size={48} color={theme?.textSecondary || '#ccc'} />
           <Text style={[styles.emptyMessage, { color: theme?.textSecondary || '#999' }]}>
             今天没有安排事件
           </Text>
@@ -221,12 +289,16 @@ export default function DayView({
   );
 }
 
+const MemoizedDayView = memo(DayView);
+export default MemoizedDayView;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
   header: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderBottomWidth: 2,
     alignItems: 'center',
   },
@@ -235,7 +307,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   dateText: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 'bold',
     marginTop: 8,
   },
@@ -319,6 +391,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontStyle: 'italic',
   },
+  readonlyContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
   eventHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -348,9 +426,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 4,
   },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
   eventStatus: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  eventTime: {
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 4,
   },
   emptyState: {
     position: 'absolute',

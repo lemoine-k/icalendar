@@ -3,6 +3,9 @@
  * 支持订阅网络上的公开日历（iCalendar 格式）
  */
 
+import { getRealWeatherData, convertWeatherToICalendar } from './weather.js';
+import { getCityEnglishName } from './cities.js';
+
 /**
  * 预设的公开日历订阅源
  */
@@ -15,6 +18,16 @@ export const PRESET_CALENDARS = {
     description: '包含中国法定节假日和调休安排',
     category: 'holidays',
     color: '#ff6b6b',
+    enabled: true,
+  },
+  // 天气订阅
+  WEATHER: {
+    id: 'weather',
+    name: '天气预报',
+    url: 'weather://daily-forecast',
+    description: '每日天气预报和天气提醒',
+    category: 'weather',
+    color: '#4A90E2',
     enabled: true,
   },
 };
@@ -54,9 +67,10 @@ export function createSubscription(params) {
 /**
  * 从 URL 获取日历数据
  * @param {string} url - iCalendar URL
+ * @param {string} locationCode - 城市代码（用于天气订阅）
  * @returns {Promise<string>} - iCalendar 字符串
  */
-export async function fetchCalendar(url) {
+export async function fetchCalendar(url, locationCode = '101010100') {
   console.log('正在获取日历数据:', url);
   
   try {
@@ -66,6 +80,22 @@ export async function fetchCalendar(url) {
       // 模拟网络延迟
       await new Promise(resolve => setTimeout(resolve, 500));
       return TEST_ICAL_DATA;
+    }
+    
+    // 处理天气订阅
+    if (url.startsWith('weather://')) {
+      const cityName = getCityEnglishName(locationCode);
+      console.log('获取天气数据，城市:', cityName);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const weatherData = await getRealWeatherData(cityName, 14);
+      
+      if (weatherData) {
+        console.log('✅ 成功获取真实天气数据');
+        return convertWeatherToICalendar(weatherData, cityName, locationCode);
+      } else {
+        throw new Error('无法获取天气数据，请检查网络连接或稍后重试');
+      }
     }
     
     // 处理 webcal:// 协议
@@ -82,19 +112,9 @@ export async function fetchCalendar(url) {
       console.log('⚠️ 检测到 Google Calendar，将优先使用代理');
     }
     
-    // 尝试多个 CORS 代理
-    // 如果是 Google Calendar，跳过直接请求，直接使用代理
-    const proxyUrls = isGoogleCalendar ? [
-      `https://api.allorigins.win/get?url=${encodeURIComponent(fetchUrl)}`,
-      `https://corsproxy.io/?${encodeURIComponent(fetchUrl)}`,
+    // 只使用可用的代理方法
+    const proxyUrls = [
       `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(fetchUrl)}`,
-      `https://thingproxy.freeboard.io/fetch/${fetchUrl}`,
-    ] : [
-      fetchUrl, // 直接尝试（可能成功）
-      `https://api.allorigins.win/get?url=${encodeURIComponent(fetchUrl)}`,
-      `https://corsproxy.io/?${encodeURIComponent(fetchUrl)}`,
-      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(fetchUrl)}`,
-      `https://thingproxy.freeboard.io/fetch/${fetchUrl}`,
     ];
     
     let lastError = null;
@@ -102,14 +122,10 @@ export async function fetchCalendar(url) {
     
     for (let i = 0; i < proxyUrls.length; i++) {
       const proxyUrl = proxyUrls[i];
-      const proxyName = i === 0 ? '直接请求' : 
-                        proxyUrl.includes('allorigins') ? 'AllOrigins' :
-                        proxyUrl.includes('corsproxy') ? 'CorsProxy' :
-                        proxyUrl.includes('codetabs') ? 'CodeTabs' :
-                        proxyUrl.includes('thingproxy') ? 'ThingProxy' : `代理${i}`;
+      const proxyName = 'CodeTabs';
       
       try {
-        console.log(`🔄 尝试方法 ${i + 1}/${proxyUrls.length} [${proxyName}]`);
+        console.log(`🔄 尝试获取日历数据 [${proxyName}]`);
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
@@ -130,20 +146,6 @@ export async function fetchCalendar(url) {
         
         let text = await response.text();
         
-        // 如果使用了 allorigins，需要解析 JSON
-        if (proxyUrl.includes('allorigins.win')) {
-          try {
-            const data = JSON.parse(text);
-            if (data.contents) {
-              text = data.contents;
-            } else {
-              throw new Error('AllOrigins 响应格式错误');
-            }
-          } catch (e) {
-            throw new Error(`AllOrigins 解析失败: ${e.message}`);
-          }
-        }
-        
         // 验证是否为有效的 iCalendar 格式
         if (!text.includes('BEGIN:VCALENDAR')) {
           throw new Error('响应不是有效的 iCalendar 格式');
@@ -154,7 +156,7 @@ export async function fetchCalendar(url) {
         
       } catch (error) {
         const errorMsg = error.name === 'AbortError' ? '请求超时' : error.message;
-        console.warn(`❌ 方法 ${i + 1} [${proxyName}] 失败:`, errorMsg);
+        console.log(`⚠️ 方法 [${proxyName}] 失败:`, errorMsg);
         errors.push(`${proxyName}: ${errorMsg}`);
         lastError = error;
         continue;
@@ -175,11 +177,12 @@ export async function fetchCalendar(url) {
  * 同步订阅日历
  * @param {object} subscription - 订阅对象
  * @param {function} parseICalendar - iCalendar 解析函数
+ * @param {string} locationCode - 城市代码（用于天气订阅）
  * @returns {Promise<object>} - 同步结果
  */
-export async function syncSubscription(subscription, parseICalendar) {
+export async function syncSubscription(subscription, parseICalendar, locationCode = '101010100') {
   try {
-    const icalString = await fetchCalendar(subscription.url);
+    const icalString = await fetchCalendar(subscription.url, locationCode);
     const events = parseICalendar(icalString);
     
     // 为订阅的事件添加标记
@@ -302,3 +305,27 @@ export const EXAMPLE_SUBSCRIPTIONS = [
     description: '热门电视剧更新时间表',
   },
 ];
+
+/**
+ * 测试用的 iCalendar 数据
+ */
+const TEST_ICAL_DATA = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test Calendar//Test//CN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+DTSTART:20250101T000000Z
+DTEND:20250102T000000Z
+DTSTAMP:20241201T000000Z
+UID:test-event-1@example.com
+CREATED:20241201T000000Z
+DESCRIPTION:测试事件描述
+LAST-MODIFIED:20241201T000000Z
+LOCATION:测试地点
+SEQUENCE:0
+STATUS:CONFIRMED
+SUMMARY:测试事件
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR`;
