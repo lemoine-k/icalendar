@@ -57,6 +57,9 @@ export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   
+  // 缓存ALARM_TRIGGER的值，避免每次渲染都调用Object.values
+  const alarmTriggerValues = useMemo(() => Object.values(ALARM_TRIGGER), []);
+  
   // 事件基本信息
   const [eventTitle, setEventTitle] = useState('');
   const [eventDescription, setEventDescription] = useState('');
@@ -1428,6 +1431,7 @@ export default function App() {
             <ScrollView 
               style={styles.iosModalScrollView}
               contentContainerStyle={styles.iosModalScrollViewContent}
+              nestedScrollEnabled={true}
               onStartShouldSetResponder={() => true}
             >
               <View style={styles.iosModalContent}>
@@ -1624,7 +1628,10 @@ export default function App() {
                     </View>
                     <TouchableOpacity
                       style={[styles.iosSwitch, hasAlarm && styles.iosSwitchActive]}
-                      onPress={() => setHasAlarm(!hasAlarm)}
+                      onPress={() => {
+                        console.log('🔔 提醒开关点击，当前状态:', hasAlarm, '切换到:', !hasAlarm);
+                        setHasAlarm(!hasAlarm);
+                      }}
                       activeOpacity={0.7}
                     >
                       <View style={[styles.iosSwitchThumb, hasAlarm && styles.iosSwitchThumbActive]} />
@@ -1642,34 +1649,42 @@ export default function App() {
                           { label: '30分钟前', value: ALARM_TRIGGER.MINUTES_30 },
                           { label: '1小时前', value: ALARM_TRIGGER.HOURS_1 },
                           { label: '自定义', value: 'CUSTOM' },
-                        ].map(({ label, value }) => (
-                          <TouchableOpacity
-                            key={value}
-                            style={[
-                              styles.iosAlarmOption,
-                              (alarmTriggers.includes(value) || (value === 'CUSTOM' && alarmTriggers.some(t => t.startsWith('-PT') && !Object.values(ALARM_TRIGGER).includes(t)))) && styles.iosAlarmOptionActive
-                            ]}
-                            onPress={() => {
-                              if (value === 'CUSTOM') {
-                                setCustomReminderVisible(true);
-                              } else {
-                                if (alarmTriggers.includes(value)) {
-                                  setAlarmTriggers(alarmTriggers.filter(t => t !== value));
+                        ].map(({ label, value }) => {
+                          const isCustomSelected = value === 'CUSTOM' && alarmTriggers.some(t => t.startsWith('-PT') && !alarmTriggerValues.includes(t));
+                          const isSelected = alarmTriggers.includes(value) || isCustomSelected;
+                          
+                          return (
+                            <TouchableOpacity
+                              key={value}
+                              style={[
+                                styles.iosAlarmOption,
+                                isSelected && styles.iosAlarmOptionActive
+                              ]}
+                              onPress={() => {
+                                console.log('🔔 提醒选项点击:', label, value, '当前alarmTriggers:', alarmTriggers);
+                                if (value === 'CUSTOM') {
+                                  setCustomReminderVisible(true);
                                 } else {
-                                  setAlarmTriggers([...alarmTriggers, value]);
+                                  if (alarmTriggers.includes(value)) {
+                                    console.log('🔔 移除提醒:', value);
+                                    setAlarmTriggers(alarmTriggers.filter(t => t !== value));
+                                  } else {
+                                    console.log('🔔 添加提醒:', value);
+                                    setAlarmTriggers([...alarmTriggers, value]);
+                                  }
                                 }
-                              }
-                            }}
-                            activeOpacity={0.7}
-                          >
-                            <Text style={[
-                              styles.iosAlarmOptionText,
-                              (alarmTriggers.includes(value) || (value === 'CUSTOM' && alarmTriggers.some(t => t.startsWith('-PT') && !Object.values(ALARM_TRIGGER).includes(t)))) && styles.iosAlarmOptionTextActive
-                            ]}>
-                              {label}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
+                              }}
+                              activeOpacity={0.7}
+                            >
+                              <Text style={[
+                                styles.iosAlarmOptionText,
+                                isSelected && styles.iosAlarmOptionTextActive
+                              ]}>
+                                {label}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
                       </View>
                       
                       <View style={styles.iosCardDivider} />
@@ -1994,7 +2009,7 @@ export default function App() {
                   if (customReminderMinutes > 0) {
                     const customTrigger = generateCustomTrigger(customReminderMinutes);
                     const existingCustomIndex = alarmTriggers.findIndex(t => 
-                      t.startsWith('-PT') && !Object.values(ALARM_TRIGGER).includes(t)
+                      t.startsWith('-PT') && !alarmTriggerValues.includes(t)
                     );
                     
                     if (existingCustomIndex >= 0) {

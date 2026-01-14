@@ -121,20 +121,32 @@ const isSpringFestivalHoliday = (dateString, eventTitle) => {
   const month = date.getMonth() + 1; // JavaScript月份从0开始
   const day = date.getDate();
   
+  // 元旦假期（1月1日-1月3日）不识别为春节
+  if (month === 1 && day <= 3) {
+    return false;
+  }
+  
   // 春节假期通常在1月下旬到2月中旬
   if (month === 1 || month === 2) {
     const title = eventTitle.toLowerCase();
     
-    // 检查是否包含春节相关的关键词
+    // 排除元旦相关的标题
+    const newYearKeywords = ['元旦', 'new year', 'new year\'s day'];
+    const hasNewYearKeyword = newYearKeywords.some(keyword => 
+      title.includes(keyword) || title.includes(keyword.toLowerCase())
+    );
+    if (hasNewYearKeyword) {
+      return false;
+    }
+    
+    // 精确的春节关键词（只包含春节相关的）
     const springFestivalKeywords = [
-      '春节', '除夕', '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
-      '新年', '过年', '年初', '正月', '春假',
-      '春节假期', '春节放假', '春节休假',
-      '黄金周', '春节黄金周', '春节黄金',
-      '春节假期 第', '春节假期第', '春节放假 第', '春节放假第',
+      '春节', '春节黄金周', '春节黄金', '春节假期', '春节放假', '春节休假',
+      '除夕', '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
       'spring festival', 'chinese new year', 'lunar new year'
     ];
     
+    // 检查是否包含春节关键词
     const hasSpringKeyword = springFestivalKeywords.some(keyword => 
       title.includes(keyword) || title.includes(keyword.toLowerCase())
     );
@@ -143,13 +155,8 @@ const isSpringFestivalHoliday = (dateString, eventTitle) => {
       return true;
     }
     
-    // 如果事件标题包含"假期"、"休假"等，且在春节期间，也认为是春节假期
-    const generalHolidayKeywords = ['假期', '休假', '放假', '休息', 'holiday', 'vacation'];
-    const hasGeneralKeyword = generalHolidayKeywords.some(keyword => 
-      title.includes(keyword) || title.includes(keyword.toLowerCase())
-    );
-    
-    if (hasGeneralKeyword && ((month === 1 && day > 15) || (month === 2 && day < 15))) {
+    // 在1月或2月期间，如果标题包含"黄金周"，也识别为春节
+    if (title.includes('黄金周') || title.includes('golden week')) {
       return true;
     }
   }
@@ -337,22 +344,10 @@ function MonthView({
           
           {/* 节假日标识 - 优化显示和样式 */}
           {isHoliday && (() => {
-            const currentDate = new Date(dateString);
-            const currentMonth = currentDate.getMonth() + 1;
-            const currentDay = currentDate.getDate();
-            const isSpringFestivalPeriod = (currentMonth === 1 && currentDay >= 16) || (currentMonth === 2 && currentDay <= 14);
-            
             const isSpringFestival = subscribedEvents.some(e => {
               const title = (e.summary || '');
               const titleLower = title.toLowerCase();
-              const result = isSpringFestivalHoliday(dateString, title) ||
-                     titleLower.includes('春节') || titleLower.includes('除夕') || 
-                     titleLower.includes('初一') || titleLower.includes('初二') || 
-                     titleLower.includes('初三') || titleLower.includes('初四') ||
-                     titleLower.includes('初五') || titleLower.includes('初六') ||
-                     titleLower.includes('新年') || titleLower.includes('过年');
-              
-              return result;
+              return isSpringFestivalHoliday(dateString, title);
             });
             
             return (

@@ -276,6 +276,44 @@ function escapeICalText(text) {
 }
 
 /**
+ * 解码 Quoted-Printable 编码
+ * 支持UTF-8编码的多字节字符
+ */
+function decodeQuotedPrintable(text) {
+  if (!text) return '';
+  
+  // 将Quoted-Printable编码的字节序列转换为UTF-8字符串
+  const bytes = [];
+  let i = 0;
+  
+  while (i < text.length) {
+    if (text[i] === '=' && i + 2 < text.length) {
+      const hex = text.substring(i + 1, i + 3);
+      bytes.push(parseInt(hex, 16));
+      i += 3;
+    } else if (text[i] === '=') {
+      // 软换行，忽略
+      i += 1;
+    } else {
+      bytes.push(text.charCodeAt(i));
+      i += 1;
+    }
+  }
+  
+  // 将字节数组转换为UTF-8字符串
+  try {
+    const uint8Array = new Uint8Array(bytes);
+    const decoder = new TextDecoder('utf-8');
+    return decoder.decode(uint8Array);
+  } catch (error) {
+    // 如果解码失败，回退到简单解码
+    return text.replace(/=([0-9A-Fa-f]{2})/g, (match, hex) => {
+      return String.fromCharCode(parseInt(hex, 16));
+    });
+  }
+}
+
+/**
  * 反转义 iCalendar 文本
  */
 function unescapeICalText(text) {
@@ -325,71 +363,80 @@ export function parseICalendar(icalString) {
       const colonIndex = line.indexOf(':');
       const key = line.substring(0, colonIndex);
       const value = line.substring(colonIndex + 1);
-      const [property] = key.split(';');
+      const [property, ...params] = key.split(';');
+      
+      // 检测编码参数
+      const isQuotedPrintable = params.some(p => p.toUpperCase() === 'ENCODING=QUOTED-PRINTABLE');
+      
+      // 解码值
+      let decodedValue = value;
+      if (isQuotedPrintable) {
+        decodedValue = decodeQuotedPrintable(value);
+      }
       
       if (currentAlarm) {
         // 解析 VALARM 属性
         switch (property) {
           case 'ACTION':
-            currentAlarm.action = value;
+            currentAlarm.action = decodedValue;
             break;
           case 'TRIGGER':
-            currentAlarm.trigger = value;
+            currentAlarm.trigger = decodedValue;
             break;
           case 'DESCRIPTION':
-            currentAlarm.description = unescapeICalText(value);
+            currentAlarm.description = unescapeICalText(decodedValue);
             break;
           case 'REPEAT':
-            currentAlarm.repeat = parseInt(value, 10);
+            currentAlarm.repeat = parseInt(decodedValue, 10);
             break;
           case 'DURATION':
-            currentAlarm.duration = value;
+            currentAlarm.duration = decodedValue;
             break;
         }
       } else if (currentEvent) {
         // 解析 VEVENT 属性
         switch (property) {
           case 'UID':
-            currentEvent.uid = value;
+            currentEvent.uid = decodedValue;
             break;
           case 'SUMMARY':
-            currentEvent.summary = unescapeICalText(value);
+            currentEvent.summary = unescapeICalText(decodedValue);
             break;
           case 'DESCRIPTION':
-            currentEvent.description = unescapeICalText(value);
+            currentEvent.description = unescapeICalText(decodedValue);
             break;
           case 'DTSTART':
-            currentEvent.dtstart = value.replace(/[TZ]/g, '');
+            currentEvent.dtstart = decodedValue.replace(/[TZ]/g, '');
             break;
           case 'DTEND':
-            currentEvent.dtend = value.replace(/[TZ]/g, '');
+            currentEvent.dtend = decodedValue.replace(/[TZ]/g, '');
             break;
           case 'LOCATION':
-            currentEvent.location = unescapeICalText(value);
+            currentEvent.location = unescapeICalText(decodedValue);
             break;
           case 'STATUS':
-            currentEvent.status = value;
+            currentEvent.status = decodedValue;
             break;
           case 'PRIORITY':
-            currentEvent.priority = parseInt(value, 10) || 0;
+            currentEvent.priority = parseInt(decodedValue, 10) || 0;
             break;
           case 'CATEGORIES':
-            currentEvent.categories = value.split(',').map(c => c.trim());
+            currentEvent.categories = decodedValue.split(',').map(c => c.trim());
             break;
           case 'RRULE':
-            currentEvent.rrule = value;
+            currentEvent.rrule = decodedValue;
             break;
           case 'DTSTAMP':
-            currentEvent.dtstamp = value;
+            currentEvent.dtstamp = decodedValue;
             break;
           case 'CREATED':
-            currentEvent.created = value;
+            currentEvent.created = decodedValue;
             break;
           case 'LAST-MODIFIED':
-            currentEvent.lastModified = value;
+            currentEvent.lastModified = decodedValue;
             break;
           case 'SEQUENCE':
-            currentEvent.sequence = parseInt(value, 10) || 0;
+            currentEvent.sequence = parseInt(decodedValue, 10) || 0;
             break;
         }
       }
