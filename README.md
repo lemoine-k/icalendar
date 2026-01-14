@@ -84,7 +84,7 @@ eas build --platform android --profile preview
 - React Native - 跨平台移动应用框架
 - Expo - 开发工具链
 - React Hooks - 状态管理
-- AsyncStorage - 本地数据存储
+- AsyncStorage - 通知配置存储
 - Push Notification - 通知系统
 
 ## 项目结构
